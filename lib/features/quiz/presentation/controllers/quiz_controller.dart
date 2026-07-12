@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/quiz_model.dart';
+import '../../../home/presentation/controllers/home_controller.dart';
+import '../../../../core/services/audio_service.dart';
 
 class QuizState {
+  static const int kQuizDurationInSeconds = 60;
+
   final List<QuizModel> questions;
   final int currentIndex;
   final int correctAnswersCount;
@@ -14,7 +18,7 @@ class QuizState {
     required this.questions,
     this.currentIndex = 0,
     this.correctAnswersCount = 0,
-    this.secondsRemaining = 30,
+    this.secondsRemaining = kQuizDurationInSeconds,
     this.isFinished = false,
     this.finalScore = 0,
   });
@@ -38,8 +42,14 @@ class QuizState {
   }
 }
 
+// Type definition for multiple family parameters using Dart Records
+typedef QuizParam = ({String category, String difficulty});
+
 class QuizNotifier extends Notifier<QuizState> {
+  final QuizParam param;
   Timer? _timer;
+
+  QuizNotifier(this.param);
 
   @override
   QuizState build() {
@@ -51,7 +61,7 @@ class QuizNotifier extends Notifier<QuizState> {
     // Start timer on build
     _startTimer();
 
-    return QuizState(questions: QuizModel.generateDummyQuestions());
+    return QuizState(questions: QuizModel.generateDummyQuestions(param.category, param.difficulty));
   }
 
   void _startTimer() {
@@ -68,6 +78,8 @@ class QuizNotifier extends Notifier<QuizState> {
           isFinished: true,
           finalScore: score,
         );
+        // Persist high score if higher
+        ref.read(highScoreProvider.notifier).updateHighScore(score);
       }
     });
   }
@@ -82,6 +94,14 @@ class QuizNotifier extends Notifier<QuizState> {
 
     final currentQuestion = state.questions[state.currentIndex];
     final isCorrect = selectedIndex == currentQuestion.correctOptionIndex;
+    
+    // Play correct/wrong sound effect
+    if (isCorrect) {
+      AudioService().playCorrectSound();
+    } else {
+      AudioService().playWrongSound();
+    }
+
     final newCorrectCount = isCorrect ? state.correctAnswersCount + 1 : state.correctAnswersCount;
 
     if (state.currentIndex < state.questions.length - 1) {
@@ -99,17 +119,19 @@ class QuizNotifier extends Notifier<QuizState> {
         isFinished: true,
         finalScore: score,
       );
+      // Persist high score if higher
+      ref.read(highScoreProvider.notifier).updateHighScore(score);
     }
   }
 
   void resetQuiz() {
     _timer?.cancel();
-    state = QuizState(questions: QuizModel.generateDummyQuestions());
+    state = QuizState(questions: QuizModel.generateDummyQuestions(param.category, param.difficulty));
     _startTimer();
   }
 }
 
-// Modern NotifierProvider definition
-final quizProvider = NotifierProvider.autoDispose<QuizNotifier, QuizState>(() {
-  return QuizNotifier();
+// Family NotifierProvider definition in Riverpod 3
+final quizProvider = NotifierProvider.family.autoDispose<QuizNotifier, QuizState, QuizParam>((param) {
+  return QuizNotifier(param);
 });

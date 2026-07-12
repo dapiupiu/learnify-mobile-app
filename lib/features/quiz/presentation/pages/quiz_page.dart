@@ -4,20 +4,23 @@ import 'package:go_router/go_router.dart';
 import '../controllers/quiz_controller.dart';
 
 class QuizPage extends ConsumerWidget {
-  final String quizTitle;
+  final String category;
+  final String difficulty;
 
   const QuizPage({
     super.key,
-    required this.quizTitle,
+    required this.category,
+    required this.difficulty,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final quizState = ref.watch(quizProvider);
+    final quizParam = (category: category, difficulty: difficulty);
+    final quizState = ref.watch(quizProvider(quizParam));
     
     // Listen for quiz completion to trigger navigation
-    ref.listen<QuizState>(quizProvider, (previous, next) {
+    ref.listen<QuizState>(quizProvider(quizParam), (previous, next) {
       if (next.isFinished) {
         context.go('/quiz-result?score=${next.finalScore}');
       }
@@ -41,7 +44,7 @@ class QuizPage extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          quizTitle,
+          'Kuis $category ($difficulty)',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -75,7 +78,11 @@ class QuizPage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '00:${quizState.secondsRemaining.toString().padLeft(2, '0')}',
+                  (() {
+                    final minutes = quizState.secondsRemaining ~/ 60;
+                    final seconds = quizState.secondsRemaining % 60;
+                    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+                  })(),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
@@ -152,7 +159,7 @@ class QuizPage extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final optionText = currentQuestion.options[index];
                     final optionLabel = '${String.fromCharCode(65 + index)}. $optionText'; // A, B, C, D
-                    return _buildOptionButton(context, ref, index, optionLabel);
+                    return _buildOptionButton(context, ref, index, optionLabel, quizParam);
                   },
                 ),
               ),
@@ -163,14 +170,14 @@ class QuizPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildOptionButton(BuildContext context, WidgetRef ref, int index, String text) {
+  Widget _buildOptionButton(BuildContext context, WidgetRef ref, int index, String text, QuizParam quizParam) {
     final theme = Theme.of(context);
     
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          ref.read(quizProvider.notifier).answerQuestion(index);
+          ref.read(quizProvider(quizParam).notifier).answerQuestion(index);
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
