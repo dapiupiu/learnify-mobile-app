@@ -1,18 +1,25 @@
 import 'package:go_router/go_router.dart';
-import '../features/home/presentation/pages/splash_page.dart';
+import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/video/presentation/pages/video_list_page.dart';
 import '../features/video/presentation/pages/video_detail_page.dart';
 import '../features/quiz/presentation/pages/quiz_page.dart';
 import '../features/quiz/presentation/pages/quiz_result_page.dart';
-import '../features/ar/presentation/pages/ar_page.dart';
+import '../features/ar/presentation/pages/ar_viewer_page.dart';
+import '../features/ar/presentation/pages/ar_list_page.dart';
+import '../features/quiz/presentation/pages/quiz_setup_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
+import '../features/settings/presentation/pages/about_page.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
     GoRoute(
       path: '/',
+      redirect: (context, state) => '/splash',
+    ),
+    GoRoute(
+      path: '/splash',
       builder: (context, state) => const SplashPage(),
     ),
     GoRoute(
@@ -31,14 +38,15 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/quiz',
-      builder: (context, state) => const QuizPage(quizTitle: 'Kuis Umum'),
+      path: '/quiz-setup',
+      builder: (context, state) => const QuizSetupPage(),
     ),
     GoRoute(
-      path: '/quiz/:title',
+      path: '/quiz/:category/:difficulty',
       builder: (context, state) {
-        final quizTitle = state.pathParameters['title'] ?? 'Kuis Umum';
-        return QuizPage(quizTitle: quizTitle);
+        final category = state.pathParameters['category'] ?? 'Bahasa';
+        final difficulty = state.pathParameters['difficulty'] ?? 'Sedang';
+        return QuizPage(category: category, difficulty: difficulty);
       },
     ),
     GoRoute(
@@ -50,12 +58,23 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/ar',
-      builder: (context, state) => const ARPage(),
+      path: '/ar-list',
+      builder: (context, state) => const ArListPage(),
+    ),
+    GoRoute(
+      path: '/ar-viewer',
+      builder: (context, state) {
+        final modelPath = state.uri.queryParameters['model'] ?? 'assets/models/animal.glb';
+        return ArViewerPage(modelPath: modelPath);
+      },
     ),
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/about',
+      builder: (context, state) => const AboutPage(),
     ),
   ],
 );
