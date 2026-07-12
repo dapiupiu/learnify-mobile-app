@@ -1,99 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/app_background.dart';
+import '../controllers/video_provider.dart';
 
-class VideoItem {
-  final String id;
-  final String title;
-  final String duration;
-  final String category;
-  final Color themeColor;
-
-  const VideoItem({
-    required this.id,
-    required this.title,
-    required this.duration,
-    required this.category,
-    required this.themeColor,
-  });
-}
-
-class VideoListPage extends StatelessWidget {
+class VideoListPage extends ConsumerWidget {
   const VideoListPage({super.key});
 
-  static const List<VideoItem> mockVideos = [
-    VideoItem(
-      id: '1',
-      title: 'Mengenal Huruf Alfabet (A-Z)',
-      duration: '05:30',
-      category: 'Bahasa',
-      themeColor: Color(0xFF6C93CD), // Pastel Blue
-    ),
-    VideoItem(
-      id: '2',
-      title: 'Belajar Berhitung 1 sampai 10',
-      duration: '04:15',
-      category: 'Matematika',
-      themeColor: Color(0xFFB0D9B1), // Pastel Green
-    ),
-    VideoItem(
-      id: '3',
-      title: 'Mengenal Warna Dasar di Sekitar Kita',
-      duration: '03:45',
-      category: 'Sains',
-      themeColor: Color(0xFFF9D9C3), // Pastel Orange
-    ),
-    VideoItem(
-      id: '4',
-      title: 'Nama-Nama Hewan Jinak & Suaranya',
-      duration: '06:12',
-      category: 'Sains',
-      themeColor: Color(0xFFE5B8F4), // Pastel Purple
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final videoListState = ref.watch(videoListProvider);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent, // transparent so AppBackground shows
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Video Pembelajaran'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
-      body: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.all(24.0),
-          itemCount: mockVideos.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final video = mockVideos[index];
-            return _buildVideoCard(context, video);
-          },
+      body: AppBackground(
+        child: SafeArea(
+          child: videoListState.when(
+            data: (videos) {
+              if (videos.isEmpty) {
+                return const Center(
+                  child: Text('Belum ada video pembelajaran.'),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(24.0),
+                itemCount: videos.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final video = videos[index];
+                  return _buildVideoCard(context, video);
+                },
+              );
+            },
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            error: (error, stackTrace) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  'Gagal memuat video: $error',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildVideoCard(BuildContext context, VideoItem video) {
+  Widget _buildVideoCard(BuildContext context, Map<String, dynamic> video) {
     final theme = Theme.of(context);
+    const primaryTextNavy = Color(0xFF2C3E50); // Primary Text Color
+    
+    // Parse color_hex dynamically
+    final colorHexStr = video['color_hex'] ?? 'FF6C93CD';
+    final Color themeColor = Color(int.parse(colorHexStr, radix: 16));
+
+    final videoId = video['id']?.toString() ?? '1';
+    final title = video['title']?.toString() ?? 'Video';
+    final duration = video['duration']?.toString() ?? '00:00';
+    final category = video['category']?.toString() ?? 'Umum';
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push('/videos/${video.id}'),
-        borderRadius: BorderRadius.circular(16.0),
+        onTap: () => context.push('/videos/$videoId'),
+        borderRadius: BorderRadius.circular(24.0),
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16.0),
+            color: Colors.white, // Solid White Card
+            borderRadius: BorderRadius.circular(24.0),
             border: Border.all(
-              color: Colors.black.withValues(alpha: 0.03),
-              width: 1.0,
+              color: const Color(0xFFEBF5FF), // Subtle border
+              width: 1.5,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06), // Soft but firm shadow
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,17 +104,17 @@ class VideoListPage extends StatelessWidget {
                 width: 110,
                 height: 110,
                 decoration: BoxDecoration(
-                  color: video.themeColor.withValues(alpha: 0.2),
+                  color: themeColor.withValues(alpha: 0.2),
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(16.0),
+                    topLeft: Radius.circular(24.0),
+                    bottomLeft: Radius.circular(24.0),
                   ),
                 ),
                 child: Center(
                   child: Icon(
                     Icons.play_circle_outline_rounded,
                     size: 40,
-                    color: video.themeColor,
+                    color: themeColor,
                   ),
                 ),
               ),
@@ -131,45 +132,44 @@ class VideoListPage extends StatelessWidget {
                           vertical: 4.0,
                         ),
                         decoration: BoxDecoration(
-                          color: video.themeColor.withValues(alpha: 0.15),
+                          color: themeColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         child: Text(
-                          video.category,
+                          category,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 12,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: video.themeColor,
+                            color: themeColor,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Judul
+                      // Judul Video
                       Text(
-                        video.title,
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.2,
+                          color: primaryTextNavy,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
-                      // Durasi
+                      const SizedBox(height: 4),
+                      // Durasi Video (statis tiruan)
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.access_time_rounded,
                             size: 14,
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: Colors.black38,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            video.duration,
+                            duration,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontSize: 12,
-                              color: Colors.black.withValues(alpha: 0.4),
+                              color: Colors.black38,
                             ),
                           ),
                         ],

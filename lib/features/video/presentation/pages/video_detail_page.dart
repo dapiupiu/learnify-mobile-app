@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
-class VideoDetailPage extends StatelessWidget {
+class VideoDetailPage extends StatefulWidget {
   final String videoId;
 
   const VideoDetailPage({
@@ -9,42 +11,111 @@ class VideoDetailPage extends StatelessWidget {
     required this.videoId,
   });
 
-  // Mock database lookup based on ID
+  @override
+  State<VideoDetailPage> createState() => _VideoDetailPageState();
+}
+
+class _VideoDetailPageState extends State<VideoDetailPage> {
+  VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
+  bool _hasError = false;
+  String _actualDuration = '00:00'; // Reactive actual duration state
+
+  // Mock database lookup based on ID, using offline asset videos
   static const Map<String, Map<String, dynamic>> videoDetailsMap = {
     '1': {
-      'title': 'Mengenal Huruf Alfabet (A-Z)',
+      'title': 'Mengenal Huruf Alfabet',
       'duration': '05:30',
       'category': 'Bahasa',
       'themeColor': Color(0xFF6C93CD),
+      'video_url': 'assets/videos/huruf.mp4',
       'description': 'Materi ini dirancang khusus untuk anak usia dini (PAUD/TK) agar dapat mengenal huruf vokal dan konsonan dengan cara bernyanyi dan menggunakan visualisasi objek berawalan huruf tersebut. Sangat direkomendasikan sebagai pembuka materi literasi.',
     },
     '2': {
-      'title': 'Belajar Berhitung 1 sampai 10',
+      'title': 'Belajar Berhitung 1-10',
       'duration': '04:15',
       'category': 'Matematika',
       'themeColor': Color(0xFFB0D9B1),
+      'video_url': 'assets/videos/angka.mp4',
       'description': 'Materi pengenalan angka dasar 1 sampai 10 menggunakan konsep menghitung buah-buahan yang muncul satu per satu di layar. Membantu anak menghubungkan angka dengan kuantitas objek secara nyata.',
     },
     '3': {
-      'title': 'Mengenal Warna Dasar di Sekitar Kita',
+      'title': 'Mengenal Warna Dasar',
       'duration': '03:45',
       'category': 'Sains',
       'themeColor': Color(0xFFF9D9C3),
+      'video_url': 'assets/videos/warna.mp4',
       'description': 'Menjelaskan warna primer (Merah, Kuning, Biru) dan penerapannya pada benda-benda sekitar seperti balon, buah, dan mainan. Disertai dengan eksperimen sederhana pencampuran warna di dalam video.',
     },
     '4': {
-      'title': 'Nama-Nama Hewan Jinak & Suaranya',
+      'title': 'Nama Hewan & Suaranya',
       'duration': '06:12',
-      'category': 'Sains',
+      'category': 'Fauna',
       'themeColor': Color(0xFFE5B8F4),
+      'video_url': 'assets/videos/hewan.mp4',
       'description': 'Petualangan mengenal hewan jinak yang biasa dipelihara di sekitar rumah (kucing, anjing, ayam, sapi). Anak-anak diajak mendengarkan suara hewan dan menirukannya secara interaktif.',
     },
   };
 
   @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+
+  void _initializePlayer() async {
+    final video = videoDetailsMap[widget.videoId] ?? {};
+    final String videoPath = video['video_url'] ?? 'assets/videos/huruf.mp4';
+
+    try {
+      _videoPlayerController = VideoPlayerController.asset(videoPath);
+      await _videoPlayerController!.initialize();
+      
+      // Extract actual duration dynamically and format as MM:SS
+      final duration = _videoPlayerController!.value.duration;
+      final minutes = duration.inMinutes.toString().padLeft(2, '0');
+      final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+      
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController!,
+        aspectRatio: _videoPlayerController!.value.aspectRatio,
+        autoPlay: false,
+        looping: false,
+        errorBuilder: (context, errorMessage) {
+          return Center(
+            child: Text(
+              errorMessage,
+              style: const TextStyle(color: Colors.white),
+            ),
+          );
+        },
+      );
+      if (mounted) {
+        setState(() {
+          _actualDuration = '$minutes:$seconds';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error initializing video player: $e');
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController?.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final video = videoDetailsMap[videoId] ?? {
+    final video = videoDetailsMap[widget.videoId] ?? {
       'title': 'Video Pembelajaran',
       'duration': '00:00',
       'category': 'Umum',
@@ -71,57 +142,12 @@ class VideoDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Video Player Mockup Container
+                    // Video Player Area
                     Container(
                       width: double.infinity,
                       height: 220,
-                      color: Colors.black.withValues(alpha: 0.05),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Play Icon Button
-                          Container(
-                            width: 70,
-                            height: 70,
-                            decoration: BoxDecoration(
-                              color: videoColor,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: videoColor.withValues(alpha: 0.3),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.play_arrow_rounded,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                          // Aspect ratio/HD tag
-                          Positioned(
-                            bottom: 12,
-                            right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.6),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                video['duration'] as String,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      color: Colors.black,
+                      child: _buildVideoWidget(videoColor),
                     ),
                     
                     // Video Metadata & Description
@@ -130,24 +156,58 @@ class VideoDetailPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Category Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0,
-                              vertical: 6.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: videoColor.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Text(
-                              video['category'] as String,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: videoColor,
+                          Row(
+                            children: [
+                              // Category Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10.0,
+                                  vertical: 6.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: videoColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Text(
+                                  video['category'] as String,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: videoColor,
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              // Actual Dynamic Duration Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10.0,
+                                  vertical: 6.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time_rounded,
+                                      size: 14,
+                                      color: Colors.black54,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _actualDuration,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           
@@ -209,7 +269,10 @@ class VideoDetailPage extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () => context.push('/quiz/${video['title']}'),
+                  onPressed: () {
+                    // Navigate to QuizPage, passing the video category and default Sedang difficulty
+                    context.push('/quiz/${video['category']}/Sedang');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -230,6 +293,41 @@ class VideoDetailPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildVideoWidget(Color videoColor) {
+    if (_hasError) {
+      return const Center(
+        child: Text(
+          'Gagal memuat video offline. Pastikan aset video terpasang dengan benar.',
+          style: TextStyle(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    final chewie = _chewieController;
+    final player = _videoPlayerController;
+
+    if (chewie != null && player != null && player.value.isInitialized) {
+      return Chewie(controller: chewie);
+    }
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: videoColor,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Menyiapkan pemutar video offline...',
+            style: TextStyle(color: Colors.white60, fontSize: 12),
+          ),
+        ],
       ),
     );
   }
