@@ -19,7 +19,7 @@ class VideoRepositoryMockImpl implements VideoRepository {
       'duration': '02:11',
       'category': 'Matematika',
       'video_url': 'assets/videos/angka.mp4',
-      'description': 'Materi pengenalan angka dasar 1 sampai 10 menggunakan konsep menghitung buah-buahan yang muncul satu per satu di layar. Membantu anak menghubungkan angka dengan kuantitas objek secara nyata.',
+      'description': 'Materi pengenalan angka dasar 1 sampai 10 menggunakan konsep menghitung yang muncul satu per satu di layar. Membantu anak menghubungkan angka dengan kuantitas objek secara nyata.',
       'color_hex': 'FFB0D9B1', // Pastel Green
     },
     {
