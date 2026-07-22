@@ -6,6 +6,7 @@ import 'package:learnify/core/services/audio_service.dart';
 import 'package:learnify/shared/widgets/lego_card.dart';
 import 'package:learnify/shared/widgets/bouncy_button.dart';
 import 'package:learnify/shared/widgets/floating_clouds.dart';
+import 'package:learnify/core/utils/route_observer.dart';
 
 class VideoDetailPage extends StatefulWidget {
   final String videoId;
@@ -19,7 +20,8 @@ class VideoDetailPage extends StatefulWidget {
   State<VideoDetailPage> createState() => _VideoDetailPageState();
 }
 
-class _VideoDetailPageState extends State<VideoDetailPage> {
+class _VideoDetailPageState extends State<VideoDetailPage> 
+    with RouteAware, WidgetsBindingObserver {
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
   bool _hasError = false;
@@ -64,6 +66,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializePlayer();
   }
 
@@ -121,7 +124,27 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      _videoPlayerController?.pause();
+    }
+  }
+
+  @override
+  void didPushNext() {
+    _videoPlayerController?.pause();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    routeObserver.unsubscribe(this);
     AudioService().resumeBgm();
     _videoPlayerController?.removeListener(_videoListener);
     _videoPlayerController?.dispose();

@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import '../core/utils/route_observer.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/video/presentation/pages/video_list_page.dart';
 import '../features/video/presentation/pages/video_detail_page.dart';
@@ -18,6 +19,7 @@ import '../features/home/presentation/pages/main_dashboard.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
+  observers: [routeObserver],
   routes: [
     GoRoute(
       path: '/splash',
