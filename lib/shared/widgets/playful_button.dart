@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/audio_service.dart';
 
 class PlayfulButton extends StatefulWidget {
   final Widget child;
@@ -50,6 +51,7 @@ class _PlayfulButtonState extends State<PlayfulButton> {
     return GestureDetector(
       onTapDown: (_) {
         if (widget.onTap != null) {
+          AudioService().playClickSfx();
           setState(() {
             _isPressed = true;
           });
