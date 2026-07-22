@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:learnify/core/services/audio_service.dart';
+import 'package:learnify/shared/widgets/lego_card.dart';
+import 'package:learnify/shared/widgets/bouncy_button.dart';
+import 'package:learnify/shared/widgets/floating_clouds.dart';
 
 class VideoDetailPage extends StatefulWidget {
   final String videoId;
@@ -19,7 +23,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
   bool _hasError = false;
-  String _actualDuration = '00:00'; // Reactive actual duration state
+  bool _wasBgmPlaying = false;
 
   // Mock database lookup based on ID, using offline asset videos
   static const Map<String, Map<String, dynamic>> videoDetailsMap = {
@@ -29,7 +33,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       'category': 'Bahasa',
       'themeColor': Color(0xFF6C93CD),
       'video_url': 'assets/videos/huruf.mp4',
-      'description': 'Materi ini dirancang khusus untuk anak usia dini (PAUD/TK) agar dapat mengenal huruf vokal dan konsonan dengan cara bernyanyi dan menggunakan visualisasi objek berawalan huruf tersebut. Sangat direkomendasikan sebagai pembuka materi literasi.',
+      'description': 'Video ini bertujuan membantu anak mengenali bentuk dan suara huruf. Guru dapat memandu siswa untuk menirukan pelafalan setiap huruf yang muncul di layar dan mengaitkannya dengan benda di sekitar kelas.',
     },
     '2': {
       'title': 'Belajar Berhitung 1-10',
@@ -37,7 +41,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       'category': 'Matematika',
       'themeColor': Color(0xFFB0D9B1),
       'video_url': 'assets/videos/angka.mp4',
-      'description': 'Materi pengenalan angka dasar 1 sampai 10 menggunakan konsep menghitung buah-buahan yang muncul satu per satu di layar. Membantu anak menghubungkan angka dengan kuantitas objek secara nyata.',
+      'description': 'Video ini dirancang untuk mengajarkan konsep angka dasar dan berhitung sederhana. Guru dapat berinteraksi dengan meminta siswa menghitung objek yang muncul bersamaan dengan angka di layar.',
     },
     '3': {
       'title': 'Mengenal Warna Dasar',
@@ -45,7 +49,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       'category': 'Sains',
       'themeColor': Color(0xFFF9D9C3),
       'video_url': 'assets/videos/warna.mp4',
-      'description': 'Menjelaskan warna primer (Merah, Kuning, Biru) dan penerapannya pada benda-benda sekitar seperti balon, buah, dan mainan. Disertai dengan eksperimen sederhana pencampuran warna di dalam video.',
+      'description': 'Video ini bertujuan mengenalkan warna-warna dasar pada benda di lingkungan sekitar. Guru dapat mengajak siswa untuk mencari benda di dalam kelas yang memiliki warna serupa dengan yang ditampilkan.',
     },
     '4': {
       'title': 'Nama Hewan & Suaranya',
@@ -53,7 +57,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       'category': 'Fauna',
       'themeColor': Color(0xFFE5B8F4),
       'video_url': 'assets/videos/hewan.mp4',
-      'description': 'Petualangan mengenal hewan jinak yang biasa dipelihara di sekitar rumah (kucing, anjing, ayam, sapi). Anak-anak diajak mendengarkan suara hewan dan menirukannya secara interaktif.',
+      'description': 'Video ini bertujuan mengenalkan berbagai jenis hewan beserta suaranya. Guru dapat mengajak siswa untuk menirukan suara hewan yang muncul sebagai bentuk interaksi aktif.',
     },
   };
 
@@ -66,35 +70,32 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   void _initializePlayer() async {
     final video = videoDetailsMap[widget.videoId] ?? {};
     final String videoPath = video['video_url'] ?? 'assets/videos/huruf.mp4';
+    final Color videoColor = video['themeColor'] as Color? ?? Colors.blue;
 
     try {
       _videoPlayerController = VideoPlayerController.asset(videoPath);
+      // Wait for initialization
       await _videoPlayerController!.initialize();
       
-      // Extract actual duration dynamically and format as MM:SS
-      final duration = _videoPlayerController!.value.duration;
-      final minutes = duration.inMinutes.toString().padLeft(2, '0');
-      final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-      
+      // Update UI after initialization
+      if (mounted) setState(() {}); 
+
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController!,
         aspectRatio: _videoPlayerController!.value.aspectRatio,
         autoPlay: false,
         looping: false,
-        errorBuilder: (context, errorMessage) {
-          return Center(
-            child: Text(
-              errorMessage,
-              style: const TextStyle(color: Colors.white),
-            ),
-          );
-        },
+        showControls: true,
+        materialProgressColors: ChewieProgressColors(
+          playedColor: videoColor,
+          handleColor: videoColor,
+          backgroundColor: Colors.white24,
+          bufferedColor: Colors.white54,
+        ),
       );
-      if (mounted) {
-        setState(() {
-          _actualDuration = '$minutes:$seconds';
-        });
-      }
+      
+      _videoPlayerController!.addListener(_videoListener);
+
     } catch (e) {
       debugPrint('Error initializing video player: $e');
       if (mounted) {
@@ -105,12 +106,30 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     }
   }
 
+  void _videoListener() {
+    if (_videoPlayerController!.value.isPlaying) {
+      if (!_wasBgmPlaying) {
+        _wasBgmPlaying = true;
+        AudioService().pauseBgm();
+      }
+    } else {
+      if (_wasBgmPlaying) {
+        AudioService().resumeBgm();
+        _wasBgmPlaying = false;
+      }
+    }
+  }
+
   @override
   void dispose() {
+    AudioService().resumeBgm();
+    _videoPlayerController?.removeListener(_videoListener);
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -126,173 +145,118 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     final Color videoColor = video['themeColor'] as Color;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Detail Materi'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Video Player Area
-                    Container(
-                      width: double.infinity,
-                      height: 220,
-                      color: Colors.black,
-                      child: _buildVideoWidget(videoColor),
-                    ),
-                    
-                    // Video Metadata & Description
-                    Padding(
+      backgroundColor: const Color(0xFFE0F2FE),
+      body: Stack(
+        children: [
+          const FloatingClouds(),
+          SafeArea(
+            child: Column(
+              children: [
+                // Custom App Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      BouncyButton(
+                        onTap: () {
+                          AudioService().playClickSfx();
+                          context.pop();
+                        },
+                        child: const Icon(Icons.arrow_back, color: Color(0xFF0c6780), size: 32),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text('Detail Materi', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0c6780))),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              // Category Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0,
-                                  vertical: 6.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: videoColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Text(
-                                  video['category'] as String,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: 12,
+                          // Video Player Area
+                          LegoCard(
+                            padding: EdgeInsets.zero,
+                            bgColor: Colors.black,
+                            borderColor: videoColor,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: AspectRatio(
+                                aspectRatio: _videoPlayerController?.value.aspectRatio ?? 16 / 9,
+                                child: _buildVideoWidget(videoColor),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          // Video Metadata & Description
+                          LegoCard(
+                            borderColor: videoColor,
+                            bgColor: Colors.white,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  video['title'] as String,
+                                  style: const TextStyle(
+                                    fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: videoColor,
+                                    color: Color(0xFF0c6780),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Actual Dynamic Duration Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0,
-                                  vertical: 6.0,
+                                const SizedBox(height: 8),
+                                Text(
+                                  video['description'] as String,
+                                  style: const TextStyle(
+                                    color: Color(0xFF7d4200),
+                                    fontSize: 16,
+                                  ),
                                 ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.access_time_rounded,
-                                      size: 14,
-                                      color: Colors.black54,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _actualDuration,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          // Title
-                          Text(
-                            video['title'] as String,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          
-                          // Divider
-                          Divider(color: Colors.black.withValues(alpha: 0.05)),
-                          const SizedBox(height: 16),
-                          
-                          // Section Title
-                          Text(
-                            'Deskripsi Pembelajaran',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          
-                          // Description Text
-                          Text(
-                            video['description'] as String,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: Colors.black54,
-                              height: 1.6,
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            
-            // Bottom Action Area
-            Container(
-              padding: const EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to QuizPage, passing the video category and default Sedang difficulty
-                    context.push('/quiz/${video['category']}/Sedang');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Mulai Kuis',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                
+                // Bottom Action Area
+                Container(
+                  padding: const EdgeInsets.all(24.0),
+                  child: BouncyButton(
+                    onTap: () {
+                      AudioService().playClickSfx();
+                      context.push('/quiz/${video['category']}/Sedang');
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFffb477),
+                        borderRadius: BorderRadius.circular(16.0),
+                        border: Border.all(color: const Color(0xFF904d00), width: 4),
+                        boxShadow: [const BoxShadow(color: Color(0xFF904d00), offset: Offset(0, 8))],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Mulai Kuis',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF904d00),
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
