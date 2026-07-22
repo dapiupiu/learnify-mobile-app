@@ -5,7 +5,7 @@ class AppTheme {
   // Mascot-Harmony Child-Friendly Color Palette
   static const Color primarySkyBlue = Color(0xFF4FB6EC); // Sky Blue Accent
   static const Color secondaryMascotOrange = Color(0xFFFFB067); // Secondary: Mascot Orange
-  static const Color backgroundLightSkyBlue = Color(0xFFEBF5FF); // Background: Light Sky Blue
+  static const Color backgroundLightSkyBlue = Color(0xFFE0F2FE); // Background: Light Sky Blue
   static const Color surfaceWhite = Colors.white; // Surface: Solid White
   static const Color primaryTextNavy = Color(0xFF2C3E50); // Primary Text/Icons: Deep Navy Blue
   

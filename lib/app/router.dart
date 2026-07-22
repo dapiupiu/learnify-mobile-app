@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
-import '../features/home/presentation/pages/home_page.dart';
 import '../features/video/presentation/pages/video_list_page.dart';
 import '../features/video/presentation/pages/video_detail_page.dart';
 import '../features/quiz/presentation/pages/quiz_page.dart';
@@ -11,20 +10,58 @@ import '../features/quiz/presentation/pages/quiz_setup_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
 import '../features/settings/presentation/pages/about_page.dart';
 
+import '../features/modules/presentation/pages/learning_hub_page.dart';
+import '../features/modules/presentation/pages/module_list_page.dart';
+import '../features/story/presentation/pages/story_list_page.dart';
+import '../features/story/presentation/pages/story_detail_page.dart';
+import '../features/home/presentation/pages/main_dashboard.dart';
+
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
   routes: [
-    GoRoute(
-      path: '/',
-      redirect: (context, state) => '/splash',
-    ),
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashPage(),
     ),
     GoRoute(
+      path: '/',
+      builder: (context, state) => const MainDashboard(),
+    ),
+    GoRoute(
       path: '/home',
-      builder: (context, state) => const HomePage(),
+      redirect: (context, state) => '/',
+    ),
+    GoRoute(
+      path: '/main-dashboard',
+      redirect: (context, state) => '/',
+    ),
+    GoRoute(
+      path: '/modules',
+      builder: (context, state) => const LearningHubPage(),
+    ),
+    GoRoute(
+      path: '/module-list',
+      builder: (context, state) => const ModuleListPage(),
+    ),
+    GoRoute(
+      path: '/story-list',
+      builder: (context, state) => const StoryListPage(),
+    ),
+    GoRoute(
+      path: '/story-detail',
+      builder: (context, state) {
+        final story = state.extra as Map<String, dynamic>?;
+        final title = story?['title'] as String? ?? 'Cerita';
+        return StoryDetailPage(title: title, story: story);
+      },
+    ),
+    GoRoute(
+      path: '/ar',
+      builder: (context, state) => const ArListPage(),
+    ),
+    GoRoute(
+      path: '/ar-list',
+      builder: (context, state) => const ArListPage(),
     ),
     GoRoute(
       path: '/videos',
@@ -56,10 +93,6 @@ final GoRouter appRouter = GoRouter(
         final score = int.tryParse(scoreString) ?? 0;
         return QuizResultPage(score: score);
       },
-    ),
-    GoRoute(
-      path: '/ar-list',
-      builder: (context, state) => const ArListPage(),
     ),
     GoRoute(
       path: '/ar-viewer',
