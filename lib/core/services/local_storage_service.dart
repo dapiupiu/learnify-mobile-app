@@ -19,6 +19,8 @@ class LocalStorageService {
 
   static const String _highScoreKey = 'high_score';
   static const String _soundEnabledKey = 'sound_enabled';
+  static const String _musicEnabledKey = 'music_enabled';
+  static const String _usernameKey = 'username';
 
   /// Saves the high score to local storage.
   Future<void> saveHighScore(int score) async {
@@ -43,5 +45,25 @@ class LocalStorageService {
   /// Retrieves the sound enabled status from local storage.
   bool getSoundEnabled() {
     return _prefs?.getBool(_soundEnabledKey) ?? true;
+  }
+
+  /// Saves the music enabled status to local storage.
+  Future<void> saveMusicEnabled(bool enabled) async {
+    await _prefs?.setBool(_musicEnabledKey, enabled);
+  }
+
+  /// Retrieves the music enabled status from local storage.
+  bool getMusicEnabled() {
+    return _prefs?.getBool(_musicEnabledKey) ?? true;
+  }
+
+  /// Saves the username to local storage.
+  Future<void> saveUsername(String username) async {
+    await _prefs?.setString(_usernameKey, username);
+  }
+
+  /// Retrieves the username from local storage.
+  String getUsername() {
+    return _prefs?.getString(_usernameKey) ?? 'Adik';
   }
 }
