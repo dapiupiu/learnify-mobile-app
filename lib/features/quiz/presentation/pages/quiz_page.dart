@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/quiz_controller.dart';
+import 'package:learnify/shared/widgets/bouncy_button.dart';
+import 'package:learnify/shared/widgets/lego_card.dart';
+import 'package:learnify/shared/widgets/floating_clouds.dart';
+import 'package:learnify/core/services/audio_service.dart';
 
-class QuizPage extends ConsumerWidget {
+class QuizPage extends ConsumerStatefulWidget {
   final String category;
   final String difficulty;
 
@@ -14,9 +18,16 @@ class QuizPage extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<QuizPage> createState() => _QuizPageState();
+}
+
+class _QuizPageState extends ConsumerState<QuizPage> {
+  String? feedback;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final quizParam = (category: category, difficulty: difficulty);
+    final quizParam = (category: widget.category, difficulty: widget.difficulty);
     final quizState = ref.watch(quizProvider(quizParam));
     
     // Listen for quiz completion to trigger navigation
@@ -26,66 +37,93 @@ class QuizPage extends ConsumerWidget {
       }
     });
 
-    final Color warningColor = theme.colorScheme.tertiary; // Pastel Orange
+    final Color primaryColor = theme.colorScheme.primary;
 
     if (quizState.questions.isEmpty) {
       return Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        backgroundColor: const Color(0xFFE0F2FE),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     final currentQuestion = quizState.questions[quizState.currentIndex];
-    final progress = (quizState.currentIndex + 1) / quizState.questions.length;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Kuis $category ($difficulty)',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          // Timer Widget
-          Container(
-            margin: const EdgeInsets.only(right: 16.0),
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            decoration: BoxDecoration(
-              color: warningColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20.0),
-              border: Border.all(
-                color: warningColor.withValues(alpha: 0.4),
-                width: 1,
-              ),
-            ),
-            child: Row(
+      backgroundColor: const Color(0xFFE0F2FE),
+      body: Stack(
+        children: [
+          const FloatingClouds(),
+          SafeArea(
+            child: Column(
               children: [
-                Icon(
-                  Icons.alarm_rounded,
-                  size: 16,
-                  color: theme.colorScheme.primary,
+                // Custom App Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      BouncyButton(
+                        onTap: () {
+                          AudioService().playClickSfx();
+                          context.pop();
+                        },
+                        child: const Icon(Icons.arrow_back, color: Color(0xFF0c6780), size: 32),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Kuis ${widget.category}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Color(0xFF0c6780)),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  (() {
-                    final minutes = quizState.secondsRemaining ~/ 60;
-                    final seconds = quizState.secondsRemaining % 60;
-                    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-                  })(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                
+                // Question Area
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        LegoCard(
+                          borderColor: primaryColor,
+                          padding: const EdgeInsets.all(24.0),
+                          child: Text(
+                            currentQuestion.questionText,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0c6780),
+                              fontSize: 22,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Feedback Indicator
+                        if (feedback != null)
+                          Text(
+                            feedback!,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: feedback == 'Benar! 🎉' ? Colors.green : Colors.red,
+                            ),
+                          ),
+                          
+                        const SizedBox(height: 16),
+                        
+                        // Options List
+                        Expanded(
+                          child: ListView.separated(
+                            itemCount: currentQuestion.options.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 16),
+                            itemBuilder: (context, index) {
+                              final optionText = currentQuestion.options[index];
+                              return _buildOptionButton(index, optionText, quizParam);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -93,130 +131,35 @@ class QuizPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Progress indicator
-              Text(
-                'Soal ${quizState.currentIndex + 1} dari ${quizState.questions.length}',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              
-              // Simple Progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4.0),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: theme.colorScheme.surface,
-                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-                  minHeight: 8.0,
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Question Area
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                child: Text(
-                  currentQuestion.questionText,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Title for Options
-              Text(
-                'Pilih Jawaban:',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.black45,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              
-              // Options List
-              Expanded(
-                child: ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: currentQuestion.options.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final optionText = currentQuestion.options[index];
-                    final optionLabel = '${String.fromCharCode(65 + index)}. $optionText'; // A, B, C, D
-                    return _buildOptionButton(context, ref, index, optionLabel, quizParam);
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
-  Widget _buildOptionButton(BuildContext context, WidgetRef ref, int index, String text, QuizParam quizParam) {
-    final theme = Theme.of(context);
-    
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
+  Widget _buildOptionButton(int index, String text, QuizParam quizParam) {
+    return BouncyButton(
+      onTap: () async {
+        AudioService().playClickSfx();
+        
+        final isCorrect = index == ref.read(quizProvider(quizParam)).questions[ref.read(quizProvider(quizParam)).currentIndex].correctOptionIndex;
+        setState(() {
+          feedback = isCorrect ? 'Benar! 🎉' : 'Salah! ❌';
+        });
+        
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          setState(() {
+            feedback = null;
+          });
           ref.read(quizProvider(quizParam).notifier).answerQuestion(index);
-        },
-        borderRadius: BorderRadius.circular(12.0),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(
-              color: Colors.black.withValues(alpha: 0.03),
-              width: 1.0,
-            ),
-          ),
-          child: Row(
-            children: [
-              // Circle selector mockup
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    width: 2,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  text,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ],
-          ),
+        }
+      },
+      child: LegoCard(
+        borderColor: const Color(0xFF4b53bc),
+        bgColor: const Color(0xFF8991fe),
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
         ),
       ),
     );

@@ -5,7 +5,7 @@ import '../../../home/presentation/controllers/home_controller.dart';
 import '../../../../core/services/audio_service.dart';
 
 class QuizState {
-  static const int kQuizDurationInSeconds = 60;
+  static const int kQuizDurationInSeconds = 120;
 
   final List<QuizModel> questions;
   final int currentIndex;

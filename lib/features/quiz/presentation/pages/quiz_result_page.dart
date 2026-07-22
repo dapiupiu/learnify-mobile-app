@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:learnify/shared/widgets/bouncy_button.dart';
+import 'package:learnify/shared/widgets/lego_card.dart';
+import 'package:learnify/core/services/audio_service.dart';
 
 class QuizResultPage extends StatelessWidget {
   final int score;
@@ -11,222 +14,102 @@ class QuizResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final correctAnswers = (score / 20).round();
-    final incorrectAnswers = 5 - correctAnswers;
+    // Assuming 5 questions, max score 100 (20 pts per question)
     
+    // Conditional feedback
+    String title;
+    String message;
+    if (score == 100) {
+      title = 'Luar Biasa, Hebat!';
+      message = 'Kamu benar semua! Pertahankan semangat belajarmu ya!';
+    } else if (score >= 60) {
+      title = 'Bagus sekali!';
+      message = 'Sedikit lagi sempurna, ayo coba sekali lagi!';
+    } else {
+      title = 'Ayo Semangat!';
+      message = 'Jangan menyerah, ayo belajar lagi agar makin pintar!';
+    }
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFFE0F2FE),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(),
-              
-              // Celebration Icon/Mascot placeholder
-              Icon(
-                Icons.emoji_events_rounded,
-                size: 90,
-                color: theme.colorScheme.tertiary, // Pastel Orange
-              ),
-              const SizedBox(height: 24),
-              
-              // Congrats Text
+              const SizedBox(height: 48),
               Text(
-                'Luar Biasa, Hebat!',
-                style: theme.textTheme.headlineMedium?.copyWith(
+                title,
+                style: const TextStyle(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Color(0xFF0c6780),
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               Text(
-                'Anda telah menyelesaikan kuis dengan sangat baik.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.black45,
-                ),
+                message,
+                style: const TextStyle(fontSize: 18, color: Color(0xFF7d4200)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               
-              // Score Circle
-              Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                    width: 6,
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$score',
-                        style: theme.textTheme.displayLarge?.copyWith(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      Text(
-                        'Skor Akhir',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Answer details card
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16.0),
-                  border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    width: 1.0,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // Score Circle as LegoCard
+              LegoCard(
+                borderColor: const Color(0xFF904d00),
+                bgColor: const Color(0xFFffb477),
+                padding: const EdgeInsets.all(32),
+                child: Column(
                   children: [
-                    // Correct Answers
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.check_circle_rounded,
-                          color: Color(0xFF81C784), // Soft Green
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Benar',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.black45,
-                              ),
-                            ),
-                            Text(
-                              '$correctAnswers Soal',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    Text(
+                      '$score',
+                      style: const TextStyle(
+                        fontSize: 64,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    
-                    // Vertical divider
-                    Container(
-                      height: 30,
-                      width: 1,
-                      color: Colors.black.withValues(alpha: 0.1),
-                    ),
-                    
-                    // Incorrect Answers
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.cancel_rounded,
-                          color: Color(0xFFE57373), // Soft Red
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Salah',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.black45,
-                              ),
-                            ),
-                            Text(
-                              '$incorrectAnswers Soal',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    const Text(
+                      'Skor Akhir',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
               ),
-              
               const Spacer(),
               
               // Action Buttons
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate back to the quiz start
-                    context.pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Ulangi Kuis',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+              BouncyButton(
+                onTap: () {
+                  AudioService().playClickSfx();
+                  context.pop();
+                },
+                child: LegoCard(
+                  borderColor: const Color(0xFF0c6780),
+                  bgColor: const Color(0xFFE0F2FE),
+                  child: const Center(child: Text('Ulangi Kuis', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0c6780), fontSize: 18))),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: OutlinedButton(
-                  onPressed: () => context.go('/home'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: theme.colorScheme.primary,
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.5),
-                      width: 2,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                  ),
-                  child: Text(
-                    'Kembali ke Beranda',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+              BouncyButton(
+                onTap: () {
+                  AudioService().playClickSfx();
+                  context.go('/main-dashboard');
+                },
+                child: LegoCard(
+                  borderColor: const Color(0xFF4b53bc),
+                  bgColor: const Color(0xFF8991fe),
+                  child: const Center(child: Text('Kembali ke Beranda', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18))),
                 ),
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
