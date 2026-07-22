@@ -1,183 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../shared/widgets/app_background.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:learnify/shared/widgets/shared_bottom_nav_bar.dart';
+import 'package:learnify/shared/widgets/bouncy_button.dart';
+import 'package:learnify/shared/widgets/lego_card.dart';
+import 'package:learnify/features/shared/widgets/app_background_stack.dart';
 
 class ArListPage extends StatelessWidget {
   const ArListPage({super.key});
 
-  final List<Map<String, dynamic>> _arItems = const [
-    {
-      'title': 'Dunia Huruf',
-      'category': 'Bahasa',
-      'model': 'assets/models/alphabet.glb',
-      'icon': Icons.abc_rounded,
-      'color': Color(0xFF6C93CD),
-      'description': 'Lihat blok huruf secara nyata.',
-    },
-    {
-      'title': 'Dunia Angka',
-      'category': 'Matematika',
-      'model': 'assets/models/numbers.glb',
-      'icon': Icons.pin_rounded,
-      'color': Color(0xFFB0D9B1),
-      'description': 'Amati bentuk ruang dan balok.',
-    },
-    {
-      'title': 'Dunia Tumbuhan',
-      'category': 'Sains',
-      'model': 'assets/models/plant.glb',
-      'icon': Icons.local_florist_rounded,
-      'color': Color(0xFFF9D9C3),
-      'description': 'Melihat indahnya bunga 3D.',
-    },
-    {
-      'title': 'Dunia Hewan',
-      'category': 'Fauna',
-      'model': 'assets/models/animal.glb',
-      'icon': Icons.pets_rounded,
-      'color': Color(0xFFE5B8F4),
-      'description': 'Bermain bersama hewan peliharaan.',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const primaryTextNavy = Color(0xFF2C3E50); // Primary Text Color
+    final arItems = [
+      {'title': 'Harimau', 'subtitle': 'Berjalan', 'color': const Color(0xFFFFB477), 'icon': Icons.pets},
+      {'title': 'Dinosaurus', 'subtitle': 'Mengaum', 'color': const Color(0xFF0C6780), 'icon': Icons.cruelty_free},
+      {'title': 'Kupu-kupu', 'subtitle': 'Terbang', 'color': const Color(0xFF4B53BC), 'icon': Icons.flutter_dash},
+    ];
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // transparent so AppBackground shows
+      backgroundColor: Colors.transparent,
+      extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Eksplorasi 3D & AR'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
+      body: AppBackgroundStack(
+        child: Column(
+          children: [
+            _buildCustomHeader(context, 'Dunia AR 3D'),
+            Expanded(
+              child: ListView.separated(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(24),
+                itemCount: arItems.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) => _buildArCard(context, arItems[index]),
+              ),
+            ),
+          ],
         ),
       ),
-      body: AppBackground(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dunia Belajar 3D ✨',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: primaryTextNavy,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Pilih kategori objek 3D untuk diputar, diperbesar, atau diproyeksikan ke dunia nyata dengan AR.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: primaryTextNavy.withValues(alpha: 0.8),
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(24.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.8,
-                  ),
-                  itemCount: _arItems.length,
-                  itemBuilder: (context, index) {
-                    final item = _arItems[index];
-                    final Color itemColor = item['color'] as Color;
+      bottomNavigationBar: const SharedBottomNavBar(currentIndex: 2),
+    );
+  }
 
-                    return GestureDetector(
-                      onTap: () {
-                        context.push('/ar-viewer?model=${Uri.encodeComponent(item['model'] as String)}');
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, // Solid White Card
-                          borderRadius: BorderRadius.circular(24.0),
-                          border: Border.all(
-                            color: const Color(0xFFEBF5FF), // Subtle border
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06), // Soft but firm shadow
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: itemColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: Icon(
-                                  item['icon'] as IconData,
-                                  color: itemColor,
-                                  size: 24,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                item['category'] as String,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: itemColor,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                item['title'] as String,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryTextNavy,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                item['description'] as String,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: primaryTextNavy.withValues(alpha: 0.7),
-                                  height: 1.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ).animate().scale(delay: (index * 100).ms, curve: Curves.easeOutBack);
-                  },
-                ),
-              ),
-            ],
+  Widget _buildCustomHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 0),
+      child: Row(
+        children: [
+          BouncyButton(
+            onTap: () { if (context.canPop()) context.pop(); else context.go('/main-dashboard'); },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, offset: Offset(0, 4))]),
+              child: const Icon(Icons.arrow_back, color: Color(0xFF0C6780)),
+            ),
           ),
+          const SizedBox(width: 16),
+          Text(title, style: GoogleFonts.quicksand(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0C6780))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildArCard(BuildContext context, Map<String, dynamic> item) {
+    return BouncyButton(
+      onTap: () => context.push('/ar-viewer'),
+      child: LegoCard(
+        bgColor: item['color'],
+        borderColor: Colors.white,
+        borderWidth: 2.0,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        constraints: const BoxConstraints(minHeight: 140, maxHeight: 160),
+        child: Row(
+          children: [
+            Container(width: 64, height: 64, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Icon(item['icon'], size: 32, color: item['color'])),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)), child: Text('3D Hidup ✨', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold))),
+                  Text(item['title'], style: GoogleFonts.quicksand(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(item['subtitle'], style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.9))),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 24),
+          ],
         ),
       ),
     );
   }
 }
+
