@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Learnify Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Quicksand -->
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0c6780",
+                        "outline": "#6f787d",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-container": "#005870",
+                        "on-tertiary-fixed-variant": "#6e3900",
+                        "secondary-fixed": "#e0e0ff",
+                        "surface-container": "#eceef0",
+                        "outline-variant": "#bfc8cd",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb77d",
+                        "on-background": "#191c1e",
+                        "primary-fixed-dim": "#89d0ed",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#1b218f",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#0c6780",
+                        "on-primary-fixed-variant": "#004d62",
+                        "on-tertiary-fixed": "#2f1500",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary-fixed": "#ffdcc3",
+                        "on-surface-variant": "#3f484c",
+                        "tertiary": "#904d00",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary": "#ffffff",
+                        "secondary": "#4b53bc",
+                        "primary-container": "#87ceeb",
+                        "on-primary-fixed": "#001f29",
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "on-tertiary-container": "#7d4200",
+                        "background": "#f7f9fb",
+                        "secondary-fixed-dim": "#bfc2ff",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#8991fe",
+                        "inverse-primary": "#89d0ed",
+                        "tertiary-container": "#ffb477",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#00006e",
+                        "surface-variant": "#e0e3e5",
+                        "primary-fixed": "#baeaff",
+                        "on-secondary-fixed-variant": "#3239a3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "touch-target-min": "56px",
+                        "gutter": "24px",
+                        "unit": "8px",
+                        "margin-desktop": "64px",
+                        "margin-mobile": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Quicksand"],
+                        "label-bold": ["Quicksand"],
+                        "display-lg-mobile": ["Quicksand"],
+                        "body-lg": ["Quicksand"],
+                        "headline-md": ["Quicksand"],
+                        "display-lg": ["Quicksand"]
+                    },
+                    "fontSize": {
+                        "body-md": ["18px", {"lineHeight": "26px", "fontWeight": "500"}],
+                        "label-bold": ["16px", {"lineHeight": "20px", "fontWeight": "700"}],
+                        "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon { font-variation-settings: 'FILL' 1 !important; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+            background: #f7f9fb;
+        }
+
+        /* 3D Depth Utilities */
+        .card-3d {
+            border-bottom-width: 8px;
+            border-color: #bfc8cd;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-3d:active {
+            transform: translateY(4px);
+            border-bottom-width: 4px;
+        }
+
+        .btn-3d {
+            border-bottom-width: 4px;
+            transition: all 0.1s ease;
+        }
+        .btn-3d:active {
+            transform: translateY(2px);
+            border-bottom-width: 0px;
+        }
+
+        /* Cloud Background Elements */
+        .cloud-bg {
+            position: absolute;
+            background: white;
+            border-radius: 9999px;
+            filter: drop-shadow(0 4px 0px rgba(180, 180, 180, 0.4));
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col relative">
+<!-- Atmospheric Decorations (Clouds) -->
+<div class="cloud-bg w-64 h-24 top-20 -left-10 opacity-60 animate-float" style="animation-delay: 0.5s;"></div>
+<div class="cloud-bg w-80 h-32 top-60 -right-20 opacity-40 animate-float"></div>
+<div class="cloud-bg w-48 h-20 bottom-40 left-1/4 opacity-50 animate-float" style="animation-delay: 1.2s;"></div>
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface-bright dark:bg-surface-dim border-b-4 border-outline-variant shadow-[0px_4px_0px_0px_rgba(180,180,180,1)] z-50">
+<div class="flex justify-between items-center px-margin-desktop py-4 max-w-[1920px] mx-auto">
+<!-- Branding & Leading -->
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-full overflow-hidden border-4 border-primary p-1 bg-white hover:scale-105 transition-transform cursor-pointer">
+<img alt="Wise Owl Mascot" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXeJfWTSNyX-UjRpPywU7dpgogw1lpLrgChy9X6Gf4ngXgO45-hDOKYNur9qybnovCALLD8rt4BlaRK1bWKDQuoALeqyTBB6dRVzusrn--dwNtw54JFVOiilD72zt3FmpV9ssaymke642ypyPWY6C6jdnvwNwwU3iJCPUDKC9DqNv579vQLDH22UI_OPpXqGZTTPI9wFi1YAODPX6bdt-7ag0OmCAtXe9vmDsf_Jhl52hGxlGHcaN4iAPm3_8EwsgMvR0Cti_1Irg"/>
+</div>
+<h1 class="font-display-lg text-display-lg text-primary font-bold">Learnify</h1>
+</div>
+<!-- Desktop Nav Cluster -->
+<nav class="hidden md:flex items-center gap-gutter">
+<button class="flex flex-col items-center justify-center p-3 text-primary transition-transform active:translate-y-1 group">
+<span class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform">home</span>
+<span class="font-label-bold text-label-bold">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center p-3 text-outline hover:text-primary transition-transform active:translate-y-1 group">
+<span class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform">menu_book</span>
+<span class="font-label-bold text-label-bold">Learn</span>
+</button>
+<button class="flex flex-col items-center justify-center p-3 text-outline hover:text-primary transition-transform active:translate-y-1 group">
+<span class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform">videogame_asset</span>
+<span class="font-label-bold text-label-bold">Play</span>
+</button>
+<button class="flex flex-col items-center justify-center p-3 text-outline hover:text-primary transition-transform active:translate-y-1 group">
+<span class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</button>
+</nav>
+<!-- Trailing Action -->
+<div class="flex items-center gap-4">
+<div class="bg-tertiary-container text-on-tertiary-container px-6 py-2 rounded-full border-b-4 border-on-tertiary-fixed-variant flex items-center gap-2 btn-3d">
+<span class="material-symbols-outlined fill-icon text-orange-500">stars</span>
+<span class="font-headline-md text-headline-md">1,240</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-desktop py-12 max-w-[1920px] mx-auto w-full gap-12">
+<!-- Welcome Section -->
+<section class="text-center">
+<h2 class="font-display-lg text-display-lg text-on-surface mb-2">Halo, Teman Kecil!</h2>
+<p class="font-body-lg text-body-lg text-outline">Apa yang ingin kamu pelajari hari ini?</p>
+</section>
+<!-- Bento Grid / Horizontal Menu -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-10 w-full">
+<!-- Card 1: Modul Belajar -->
+<div class="bg-white p-8 rounded-lg border-4 border-primary card-3d flex flex-col items-center text-center group cursor-pointer hover:bg-surface-container-low">
+<div class="w-48 h-48 bg-primary-container rounded-full flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform">
+<span class="material-symbols-outlined text-[96px] text-primary">menu_book</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Modul Belajar</h3>
+<p class="font-body-md text-body-md text-outline mb-6">Baca buku cerita seru dan belajar angka!</p>
+<button class="w-full bg-primary text-on-primary py-4 rounded-full font-label-bold text-label-bold border-b-4 border-[#004d62] btn-3d">
+                    Mulai Belajar
+                </button>
+</div>
+<!-- Card 2: Dunia AR 3D (Primary Featured) -->
+<div class="bg-tertiary-container p-8 rounded-lg border-4 border-tertiary card-3d flex flex-col items-center text-center group cursor-pointer hover:scale-[1.02] transform transition-all relative overflow-hidden" style="border-bottom-color: #6e3900;">
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
+<div class="w-48 h-48 bg-white rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-[96px] text-tertiary">view_in_ar</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-tertiary-container mb-2">Dunia AR 3D</h3>
+<p class="font-body-md text-body-md text-on-tertiary-fixed-variant mb-6">Lihat hewan favoritmu hidup di depan mata!</p>
+<button class="w-full bg-tertiary text-on-tertiary py-4 rounded-full font-label-bold text-label-bold border-b-4 border-[#6e3900] btn-3d">
+                    Buka Kamera AR
+                </button>
+</div>
+<!-- Card 3: Pojok Cerita -->
+<div class="bg-secondary-container p-8 rounded-lg border-4 border-secondary card-3d flex flex-col items-center text-center group cursor-pointer hover:bg-surface-container-low" style="border-bottom-color: #3239a3;">
+<div class="w-48 h-48 bg-white rounded-full flex items-center justify-center mb-6 group-hover:-rotate-6 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-[96px] text-secondary">theaters</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-secondary-container mb-2">Pojok Cerita</h3>
+<p class="font-body-md text-body-md text-on-secondary-fixed-variant mb-6">Tonton video dongeng animasi yang lucu!</p>
+<button class="w-full bg-secondary text-on-secondary py-4 rounded-full font-label-bold text-label-bold border-b-4 border-[#3239a3] btn-3d">
+                    Lihat Cerita
+                </button>
+</div>
+</section>
+<!-- Progress Row -->
+<section class="w-full max-w-4xl bg-surface-container rounded-lg p-6 flex flex-col md:flex-row items-center justify-between border-4 border-outline-variant">
+<div class="flex items-center gap-4 mb-4 md:mb-0">
+<span class="material-symbols-outlined text-4xl text-primary">military_tech</span>
+<div>
+<p class="font-label-bold text-label-bold">Target Harian</p>
+<p class="font-body-md text-body-md text-outline">Selesaikan 2 modul lagi hari ini!</p>
+</div>
+</div>
+<div class="flex gap-2">
+<!-- Progress Stars -->
+<span class="material-symbols-outlined fill-icon text-tertiary text-4xl animate-bounce" style="animation-delay: 0.1s;">star</span>
+<span class="material-symbols-outlined fill-icon text-tertiary text-4xl animate-bounce" style="animation-delay: 0.2s;">star</span>
+<span class="material-symbols-outlined fill-icon text-tertiary text-4xl animate-bounce" style="animation-delay: 0.3s;">star</span>
+<span class="material-symbols-outlined text-outline text-4xl">star</span>
+<span class="material-symbols-outlined text-outline text-4xl">star</span>
+</div>
+</section>
+</main>
+<!-- Footer Decoration -->
+<footer class="w-full pb-10 flex flex-col items-center gap-4 relative overflow-hidden mt-12">
+<!-- Floating Cloud Visuals -->
+<div class="absolute bottom-0 left-0 w-full h-24 bg-sky-100/50 flex items-end justify-center pointer-events-none">
+<div class="w-32 h-16 bg-white rounded-t-full absolute -bottom-4 left-1/4"></div>
+<div class="w-48 h-24 bg-white rounded-t-full absolute -bottom-6 left-1/2"></div>
+<div class="w-40 h-20 bg-white rounded-t-full absolute -bottom-4 right-1/4"></div>
+</div>
+<div class="z-10 flex flex-col items-center gap-2">
+<p class="font-label-bold text-label-bold text-primary">© 2024 Learnify - Play &amp; Learn</p>
+<div class="flex gap-6">
+<a class="font-body-md text-body-md text-outline hover:text-tertiary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-outline hover:text-tertiary transition-colors" href="#">Help Center</a>
+<a class="font-body-md text-body-md text-outline hover:text-tertiary transition-colors" href="#">Parent Corner</a>
+</div>
+</div>
+<!-- Interactive Elements -->
+<div class="flex gap-4 z-10">
+<span class="material-symbols-outlined text-tertiary-container animate-pulse">spark</span>
+<span class="material-symbols-outlined text-primary-container animate-pulse" style="animation-delay: 0.5s;">bubble_chart</span>
+<span class="material-symbols-outlined text-secondary-container animate-pulse" style="animation-delay: 1s;">cloud</span>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile only suppression logic handled by hidden md:flex in desktop nav) -->
+<div class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t-4 border-outline-variant shadow-[0px_-4px_0px_0px_rgba(180,180,180,1)] px-4 pb-4 pt-2 flex justify-around items-center z-50 rounded-t-lg">
+<button class="flex flex-col items-center justify-center bg-tertiary-container text-on-tertiary-container rounded-lg p-2 translate-y-[-4px] border-b-4 border-on-tertiary-fixed-variant transition-all">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-bold text-label-bold">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-bold text-label-bold">Learn</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">videogame_asset</span>
+<span class="font-label-bold text-label-bold">Play</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</button>
+</div>
+<!-- Small Script for Tap Sounds simulation / Haptics -->
+<script>
+        document.querySelectorAll('.btn-3d, .card-3d').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                // Future expansion: Play subtle pop sound
+                console.log('Pop!');
+            });
+        });
+    </script>
+</body></html>
