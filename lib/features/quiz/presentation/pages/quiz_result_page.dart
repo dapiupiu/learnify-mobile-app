@@ -6,17 +6,18 @@ import 'package:learnify/core/services/audio_service.dart';
 
 class QuizResultPage extends StatelessWidget {
   final int score;
+  final String category;
+  final String difficulty;
 
   const QuizResultPage({
     super.key,
     required this.score,
+    required this.category,
+    required this.difficulty,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Assuming 5 questions, max score 100 (20 pts per question)
-    
-    // Conditional feedback
     String title;
     String message;
     if (score == 100) {
@@ -56,7 +57,6 @@ class QuizResultPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               
-              // Score Circle as LegoCard
               LegoCard(
                 borderColor: const Color(0xFF904d00),
                 bgColor: const Color(0xFFffb477),
@@ -84,11 +84,10 @@ class QuizResultPage extends StatelessWidget {
               ),
               const Spacer(),
               
-              // Action Buttons
               BouncyButton(
                 onTap: () {
                   AudioService().playClickSfx();
-                  context.pop();
+                  context.pushReplacement('/quiz/$category/$difficulty');
                 },
                 child: LegoCard(
                   borderColor: const Color(0xFF0c6780),

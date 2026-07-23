@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:learnify/core/services/audio_service.dart';
 import 'package:learnify/shared/widgets/lego_card.dart';
 import 'package:learnify/shared/widgets/bouncy_button.dart';
-import 'package:learnify/shared/widgets/floating_clouds.dart';
+import 'package:learnify/features/shared/widgets/app_background_stack.dart';
 import 'package:learnify/core/utils/route_observer.dart';
 
 class VideoDetailPage extends StatefulWidget {
@@ -168,117 +169,120 @@ class _VideoDetailPageState extends State<VideoDetailPage>
     final Color videoColor = video['themeColor'] as Color;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE0F2FE),
-      body: Stack(
-        children: [
-          const FloatingClouds(),
-          SafeArea(
-            child: Column(
-              children: [
-                // Custom App Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    children: [
-                      BouncyButton(
-                        onTap: () {
-                          AudioService().playClickSfx();
-                          context.pop();
-                        },
-                        child: const Icon(Icons.arrow_back, color: Color(0xFF0c6780), size: 32),
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: AppBackgroundStack(
+        child: Column(
+          children: [
+            // Custom App Bar
+            _buildCustomHeader(context, 'Detail Materi'),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 110),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Video Player Area
+                    LegoCard(
+                      padding: EdgeInsets.zero,
+                      bgColor: Colors.black,
+                      borderColor: videoColor,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: AspectRatio(
+                          aspectRatio: _videoPlayerController?.value.aspectRatio ?? 16 / 9,
+                          child: _buildVideoWidget(videoColor),
+                        ),
                       ),
-                      const SizedBox(width: 16),
-                      const Text('Detail Materi', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0c6780))),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Video Metadata & Description
+                    LegoCard(
+                      borderColor: videoColor,
+                      bgColor: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Video Player Area
-                          LegoCard(
-                            padding: EdgeInsets.zero,
-                            bgColor: Colors.black,
-                            borderColor: videoColor,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: AspectRatio(
-                                aspectRatio: _videoPlayerController?.value.aspectRatio ?? 16 / 9,
-                                child: _buildVideoWidget(videoColor),
-                              ),
+                          Text(
+                            video['title'] as String,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0c6780),
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          
-                          // Video Metadata & Description
-                          LegoCard(
-                            borderColor: videoColor,
-                            bgColor: Colors.white,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  video['title'] as String,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0c6780),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  video['description'] as String,
-                                  style: const TextStyle(
-                                    color: Color(0xFF7d4200),
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 8),
+                          Text(
+                            video['description'] as String,
+                            style: const TextStyle(
+                              color: Color(0xFF7d4200),
+                              fontSize: 16,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                
-                // Bottom Action Area
-                Container(
-                  padding: const EdgeInsets.all(24.0),
-                  child: BouncyButton(
-                    onTap: () {
-                      AudioService().playClickSfx();
-                      context.push('/quiz/${video['category']}/Sedang');
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFffb477),
-                        borderRadius: BorderRadius.circular(16.0),
-                        border: Border.all(color: const Color(0xFF904d00), width: 4),
-                        boxShadow: [const BoxShadow(color: Color(0xFF904d00), offset: Offset(0, 8))],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Mulai Kuis',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF904d00),
-                            fontSize: 20,
-                          ),
-                        ),
+              ),
+            ),
+            
+            // Bottom Action Area
+            Container(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: BouncyButton(
+                onTap: () {
+                  AudioService().playClickSfx();
+                  context.push('/quiz/${video['category']}/Sedang');
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFffb477),
+                    borderRadius: BorderRadius.circular(16.0),
+                    border: Border.all(color: const Color(0xFF904d00), width: 4),
+                    boxShadow: [const BoxShadow(color: Color(0xFF904d00), offset: Offset(0, 8))],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Mulai Kuis',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF904d00),
+                        fontSize: 20,
                       ),
                     ),
                   ),
                 ),
-              ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 0),
+      child: Row(
+        children: [
+          BouncyButton(
+            onTap: () {
+              AudioService().playClickSfx();
+              context.pop();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, offset: Offset(0, 4))]),
+              child: const Icon(Icons.arrow_back, color: Color(0xFF0c6780)),
             ),
           ),
+          const SizedBox(width: 16),
+          Text(title, style: GoogleFonts.quicksand(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0c6780))),
         ],
       ),
     );

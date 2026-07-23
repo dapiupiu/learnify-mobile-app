@@ -32,7 +32,7 @@ class StoryListPage extends StatelessWidget {
             Expanded(
               child: ListView.separated(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 110),
                 itemCount: stories.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 24),
                 itemBuilder: (context, index) => _buildStoryCard(context, stories[index]),
@@ -77,8 +77,7 @@ class StoryListPage extends StatelessWidget {
             Container(width: 80, height: 80, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Icon(item['icon'], size: 48, color: item['color'])),
             const SizedBox(width: 16),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item['title'], style: GoogleFonts.quicksand(fontSize: 20, fontWeight: FontWeight.bold, color: textColor)), const SizedBox(height: 4), Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(8)), child: Text('Dongeng', style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.bold, color: textColor)))]))
-            , const Icon(Icons.volume_up, size: 32, color: primaryColor)
-            ],
+          ],
         ),
       ),
     );

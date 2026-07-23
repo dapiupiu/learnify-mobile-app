@@ -29,7 +29,7 @@ class ModuleListPage extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 110),
                 child: Column(
                   children: [
                     _buildModuleCard(context, title: 'Belajar Huruf', subtitle: 'Mengenal huruf A-Z', icon: Icons.abc, color: primaryColor, bgColor: Colors.white, textColor: primaryColor, videoId: '1'),
@@ -120,11 +120,9 @@ class ModuleListPage extends StatelessWidget {
             Container(width: 80, height: 80, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), shape: BoxShape.circle), child: Icon(icon, size: 48, color: textColor)),
             const SizedBox(width: 16),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: GoogleFonts.quicksand(fontSize: 20, fontWeight: FontWeight.bold, color: textColor)), Text(subtitle, style: GoogleFonts.quicksand(fontSize: 16, fontWeight: FontWeight.bold, color: textColor.withValues(alpha: 0.9)))]))
-          , const Icon(Icons.volume_up, size: 32, color: primaryColor)
           ],
         ),
       ),
     );
   }
 }
-

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/app_background.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:learnify/features/shared/widgets/app_background_stack.dart';
+import 'package:learnify/shared/widgets/bouncy_button.dart';
+import 'package:learnify/shared/widgets/shared_bottom_nav_bar.dart';
 import '../controllers/video_provider.dart';
 
 class VideoListPage extends ConsumerWidget {
@@ -12,52 +15,69 @@ class VideoListPage extends ConsumerWidget {
     final videoListState = ref.watch(videoListProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // transparent so AppBackground shows
+      backgroundColor: Colors.transparent,
+      extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Video Pembelajaran'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: AppBackground(
-        child: SafeArea(
-          child: videoListState.when(
-            data: (videos) {
-              if (videos.isEmpty) {
-                return const Center(
-                  child: Text('Belum ada video pembelajaran.'),
-                );
-              }
-              return ListView.separated(
-                padding: const EdgeInsets.all(24.0),
-                itemCount: videos.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final video = videos[index];
-                  return _buildVideoCard(context, video);
+      body: AppBackgroundStack(
+        child: Column(
+          children: [
+            _buildCustomHeader(context, 'Video Pembelajaran'),
+            Expanded(
+              child: videoListState.when(
+                data: (videos) {
+                  if (videos.isEmpty) {
+                    return const Center(
+                      child: Text('Belum ada video pembelajaran.'),
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 110),
+                    itemCount: videos.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final video = videos[index];
+                      return _buildVideoCard(context, video);
+                    },
+                  );
                 },
-              );
-            },
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (error, stackTrace) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Text(
-                  'Gagal memuat video: $error',
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, stackTrace) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Text(
+                      'Gagal memuat video: $error',
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
+      ),
+      bottomNavigationBar: const SharedBottomNavBar(currentIndex: 1),
+    );
+  }
+
+  Widget _buildCustomHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 0),
+      child: Row(
+        children: [
+          BouncyButton(
+            onTap: () => context.pop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, offset: Offset(0, 4))]),
+              child: const Icon(Icons.arrow_back, color: Color(0xFF0C6780)),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(title, style: GoogleFonts.quicksand(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0C6780))),
+        ],
       ),
     );
   }

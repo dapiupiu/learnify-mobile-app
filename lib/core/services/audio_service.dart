@@ -22,7 +22,8 @@ class AudioService {
   Future<void> handleFirstInteraction() async {
     if (_isFirstInteraction) {
       _isFirstInteraction = false;
-      await startBgmIfEnabled();
+      // Force play if interaction occurred, as browser policy allows it now
+      await playBgm();
     }
   }
 
@@ -50,7 +51,9 @@ class AudioService {
       await _wrongPlayer.setSource(AssetSource(_getAssetPath('audio/wrong.mp3')));
       await _clickPlayer.setSource(AssetSource(_getAssetPath('audio/click_sfx.mp3')));
       await _bgmPlayer.setSource(AssetSource(_getAssetPath('audio/bgm_education.mp3')));
-      await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
+
+      // Auto-start BGM if enabled
+      await startBgmIfEnabled();
     } catch (e, stack) {
       debugPrint('AudioService: Error preloading assets: $e\n$stack');
     }
@@ -77,9 +80,13 @@ class AudioService {
   Future<void> playBgm() async {
     final bgmEnabled = LocalStorageService().getMusicEnabled();
     if (!bgmEnabled) return;
+
+    // Check if already playing
+    if (_bgmPlayer.state == PlayerState.playing) return;
+
     try {
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
-      await _bgmPlayer.resume();
+      await _bgmPlayer.play(AssetSource(_getAssetPath('audio/bgm_education.mp3')));
     } catch (e, stack) {
       debugPrint('AudioService: Error playing BGM: $e\n$stack');
     }

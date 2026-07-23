@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:learnify/core/services/audio_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -23,36 +24,41 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE0F2FE),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFE0F2FE),
+        ),
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/images/mascot.png', width: 250, height: 250)
-                  .animate()
-                  .scale(duration: 800.ms, curve: Curves.elasticOut),
-              const SizedBox(height: 48),
-              Text('Learnify',
-                      style: GoogleFonts.quicksand(
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF0C6780)))
-                  .animate()
-                  .fadeIn(delay: 500.ms),
+              Container(
+                width: 200,
+                height: 200,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Image.asset('assets/images/mascot.png'),
+              ),
+              const SizedBox(height: 32),
+              Text('Learnify', style: GoogleFonts.quicksand(fontSize: 48, fontWeight: FontWeight.bold, color: const Color(0xFF0C6780))),
               const SizedBox(height: 16),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Siap Menjelajah Dunia Belajar yang Seru?',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.quicksand(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF4B53BC)),
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text('Jelajahi Dunia Belajar Interaktif & Seru dalam AR!', textAlign: TextAlign.center, style: GoogleFonts.quicksand(fontSize: 18, color: const Color(0xFF0C6780).withOpacity(0.9))),
+              ),
+              const SizedBox(height: 48),
+              SizedBox(
+                width: 200,
+                child: LinearProgressIndicator(
+                  backgroundColor: const Color(0xFF0C6780).withOpacity(0.2),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0C6780)),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
-              ).animate().fadeIn(delay: 1000.ms),
+              ),
             ],
           ),
         ),

@@ -12,9 +12,10 @@ class ArListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arItems = [
-      {'title': 'Harimau', 'subtitle': 'Berjalan', 'color': const Color(0xFFFFB477), 'icon': Icons.pets},
-      {'title': 'Dinosaurus', 'subtitle': 'Mengaum', 'color': const Color(0xFF0C6780), 'icon': Icons.cruelty_free},
-      {'title': 'Kupu-kupu', 'subtitle': 'Terbang', 'color': const Color(0xFF4B53BC), 'icon': Icons.flutter_dash},
+      {'title': 'Kerbau (Buffalo)', 'subtitle': 'Mencari Makan Rumput', 'color': const Color(0xFF9E9E9E), 'icon': Icons.pets, 'asset': 'assets/models/cow.glb'}, // Bold Grey
+      {'title': 'Ikan (Fish)', 'subtitle': 'Berenang dengan Cepat', 'color': const Color(0xFF00BCD4), 'icon': Icons.water, 'asset': 'assets/models/fish.glb'}, // Bold Cyan
+      {'title': 'Laba-laba (Spider)', 'subtitle': 'Merayap Lincah', 'color': const Color(0xFF673AB7), 'icon': Icons.bug_report, 'asset': 'assets/models/spider.glb'}, // Bold Purple
+      {'title': 'Serigala (Wolf)', 'subtitle': 'Mengaum di Malam Hari', 'color': const Color(0xFFD32F2F), 'icon': Icons.pets, 'asset': 'assets/models/wolf.glb'}, // Bold Crimson
     ];
 
     return Scaffold(
@@ -26,18 +27,40 @@ class ArListPage extends StatelessWidget {
           children: [
             _buildCustomHeader(context, 'Dunia AR 3D'),
             Expanded(
-              child: ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(24),
-                itemCount: arItems.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) => _buildArCard(context, arItems[index]),
+              child: ListView(
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 20),
+                children: [
+                  _buildInteractiveGuideBanner(),
+                  const SizedBox(height: 24),
+                  ...arItems.map((item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildArCard(context, item),
+                  )),
+                ],
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: const SharedBottomNavBar(currentIndex: 2),
+    );
+  }
+
+  Widget _buildInteractiveGuideBanner() {
+    return LegoCard(
+      bgColor: Colors.white.withValues(alpha: 0.9), // Soft background
+      borderColor: const Color(0xFF0C6780),
+      borderWidth: 2.0, // Thinner border
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [const Icon(Icons.lightbulb, color: Colors.amber), const SizedBox(width: 8), Text('Panduan Bermain AR', style: GoogleFonts.quicksand(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0C6780)))]),
+          const SizedBox(height: 12),
+          Text('1. 👆 Putar Hewan\n2. 🔍 Pinch untuk Zoom', style: GoogleFonts.quicksand(fontSize: 14, color: const Color(0xFF7d4200))),
+        ],
+      ),
     );
   }
 
@@ -63,25 +86,24 @@ class ArListPage extends StatelessWidget {
 
   Widget _buildArCard(BuildContext context, Map<String, dynamic> item) {
     return BouncyButton(
-      onTap: () => context.push('/ar-viewer'),
+      onTap: () => context.push('/ar-viewer?model=${item['asset']}'),
       child: LegoCard(
         bgColor: item['color'],
-        borderColor: Colors.white,
+        borderColor: Colors.white.withValues(alpha: 0.5), // Softer border
         borderWidth: 2.0,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        constraints: const BoxConstraints(minHeight: 140, maxHeight: 160),
+        constraints: const BoxConstraints(minHeight: 120),
         child: Row(
           children: [
-            Container(width: 64, height: 64, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: Icon(item['icon'], size: 32, color: item['color'])),
+            Container(width: 64, height: 64, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.5), shape: BoxShape.circle), child: Icon(item['icon'], size: 32, color: Colors.white)), // Softer icon color
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)), child: Text('3D Hidup ✨', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold))),
-                  Text(item['title'], style: GoogleFonts.quicksand(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                  Text(item['subtitle'], style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.9))),
+                  Text(item['title'], style: GoogleFonts.quicksand(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(item['subtitle'], style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70)),
                 ],
               ),
             ),
@@ -92,4 +114,3 @@ class ArListPage extends StatelessWidget {
     );
   }
 }
-

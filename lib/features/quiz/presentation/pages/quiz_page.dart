@@ -6,6 +6,8 @@ import 'package:learnify/shared/widgets/bouncy_button.dart';
 import 'package:learnify/shared/widgets/lego_card.dart';
 import 'package:learnify/shared/widgets/floating_clouds.dart';
 import 'package:learnify/core/services/audio_service.dart';
+import 'package:learnify/features/shared/widgets/app_background_stack.dart';
+import 'package:learnify/shared/widgets/shared_bottom_nav_bar.dart';
 
 class QuizPage extends ConsumerStatefulWidget {
   final String category;
@@ -33,7 +35,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
     // Listen for quiz completion to trigger navigation
     ref.listen<QuizState>(quizProvider(quizParam), (previous, next) {
       if (next.isFinished) {
-        context.go('/quiz-result?score=${next.finalScore}');
+        context.go('/quiz-result?score=${next.finalScore}&category=${widget.category}&difficulty=${widget.difficulty}');
       }
     });
 
@@ -49,38 +51,23 @@ class _QuizPageState extends ConsumerState<QuizPage> {
     final currentQuestion = quizState.questions[quizState.currentIndex];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE0F2FE),
-      body: Stack(
-        children: [
-          const FloatingClouds(),
-          SafeArea(
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: AppBackgroundStack(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Column(
               children: [
                 // Custom App Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    children: [
-                      BouncyButton(
-                        onTap: () {
-                          AudioService().playClickSfx();
-                          context.pop();
-                        },
-                        child: const Icon(Icons.arrow_back, color: Color(0xFF0c6780), size: 32),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Kuis ${widget.category}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Color(0xFF0c6780)),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildCustomHeader(context, 'Kuis ${widget.category}'),
                 
                 // Question Area
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
                         LegoCard(
@@ -111,16 +98,17 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                           
                         const SizedBox(height: 16),
                         
-                        // Options List
-                        Expanded(
-                          child: ListView.separated(
-                            itemCount: currentQuestion.options.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 16),
-                            itemBuilder: (context, index) {
-                              final optionText = currentQuestion.options[index];
-                              return _buildOptionButton(index, optionText, quizParam);
-                            },
-                          ),
+                        // Options Grid
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 2.8,
+                          children: List.generate(currentQuestion.options.length, (index) {
+                            return _buildOptionButton(index, currentQuestion.options[index], quizParam);
+                          }),
                         ),
                       ],
                     ),
@@ -128,6 +116,37 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SharedBottomNavBar(currentIndex: 1),
+    );
+  }
+
+  Widget _buildCustomHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 0),
+      child: Row(
+        children: [
+          BouncyButton(
+            onTap: () {
+              AudioService().playClickSfx();
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/main-dashboard');
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, offset: Offset(0, 4))]),
+              child: const Icon(Icons.arrow_back, color: Color(0xFF0c6780)),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Color(0xFF0c6780)),
           ),
         ],
       ),
@@ -155,11 +174,14 @@ class _QuizPageState extends ConsumerState<QuizPage> {
       child: LegoCard(
         borderColor: const Color(0xFF4b53bc),
         bgColor: const Color(0xFF8991fe),
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18),
+          ),
         ),
       ),
     );

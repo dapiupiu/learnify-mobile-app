@@ -41,39 +41,39 @@ class _MainDashboardState extends State<MainDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) {
-        AudioService().playClickSfx();
-        AudioService().handleFirstInteraction();
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: skyBlueBg,
         body: Stack(
           children: [
             const FloatingClouds(),
             SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildTopAppBar(),
-                    const SizedBox(height: 48),
-                    _buildWelcomeBadge(),
-                    const SizedBox(height: 48),
-                    _buildMainCards(),
-                    const SizedBox(height: 32),
-                    _buildFooter(),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: _buildTopAppBar(),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 20),
+                      child: Column(
+                        children: [
+                          _buildWelcomeBadge(),
+                          const SizedBox(height: 32),
+                          _buildMainCards(),
+                          const SizedBox(height: 32),
+                          _buildFooter(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
         bottomNavigationBar: const SharedBottomNavBar(currentIndex: 0),
-      ),
     );
   }
 
@@ -148,6 +148,6 @@ class _MainDashboardState extends State<MainDashboard> {
   }
 
   Widget _buildFooter() {
-    return Column(children: [Text('© 2024 Learnify', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: outlineVariant)), const SizedBox(height: 8), Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text('Privacy', style: GoogleFonts.quicksand(color: outlineVariant)), const SizedBox(width: 16), Text('Help', style: GoogleFonts.quicksand(color: outlineVariant))])]);
+    return Column(children: [Text('© 2026 Learnify', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: outlineVariant)), const SizedBox(height: 8), Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text('Privacy', style: GoogleFonts.quicksand(color: outlineVariant)), const SizedBox(width: 16), Text('Help', style: GoogleFonts.quicksand(color: outlineVariant))])]);
   }
 }

@@ -93,7 +93,9 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final scoreString = state.uri.queryParameters['score'] ?? '0';
         final score = int.tryParse(scoreString) ?? 0;
-        return QuizResultPage(score: score);
+        final category = state.uri.queryParameters['category'] ?? 'Bahasa';
+        final difficulty = state.uri.queryParameters['difficulty'] ?? 'Sedang';
+        return QuizResultPage(score: score, category: category, difficulty: difficulty);
       },
     ),
     GoRoute(

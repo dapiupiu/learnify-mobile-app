@@ -45,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
             _buildCustomHeader(context, 'Pengaturan'),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 110),
                 child: Column(
                   children: [
                     _buildProfileCard(),
@@ -63,9 +63,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       setState(() {});
                     }),
                     const SizedBox(height: 24),
-                    _buildActionButton('Tentang Learnify', Icons.info),
+                    _buildActionButton('Tentang Learnify', Icons.info, () => _showTentangLearnify(context)),
                     const SizedBox(height: 16),
-                    _buildActionButton('Panduan Orang Tua', Icons.menu_book),
+                    _buildActionButton('Panduan Guru', Icons.menu_book, () => _showPanduanGuru(context)),
                   ],
                 ),
               ),
@@ -124,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Pemain:', style: GoogleFonts.quicksand(fontSize: 16, color: primaryColor)),
+                  Text('Kelas/Kelompok:', style: GoogleFonts.quicksand(fontSize: 16, color: primaryColor)),
                   Text(_appState.childName, style: GoogleFonts.quicksand(fontSize: 28, fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -161,9 +161,9 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildActionButton(String title, IconData icon) {
+  Widget _buildActionButton(String title, IconData icon, VoidCallback onTap) {
     return GestureDetector(
-      onTap: () => _verifyParentalGate(context, title),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: primaryColor, width: 2), boxShadow: const [BoxShadow(color: primaryColor, offset: Offset(0, 4))]),
@@ -172,12 +172,11 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _verifyParentalGate(BuildContext context, String title) {
-    final controller = TextEditingController();
-    showDialog(context: context, builder: (context) => AlertDialog(title: const Text('Verifikasi Orang Tua'), content: const Text('Berapa 2 + 3?'), actions: [TextField(controller: controller, keyboardType: TextInputType.number, decoration: const InputDecoration(hintText: 'Jawaban')), TextButton(onPressed: () { if (controller.text == '5') { context.pop(); _showInfoDialog(context, title); } }, child: const Text('Verifikasi'))]));
+  void _showPanduanGuru(BuildContext context) {
+    showDialog(context: context, builder: (context) => AlertDialog(title: const Text('Panduan Guru'), content: const Text('Aplikasi ini dirancang sebagai modul pembelajaran interaktif untuk anak TK/PAUD. Tujuannya adalah untuk menstimulasi aspek kognitif, motorik, dan kreativitas anak melalui video edukatif, kuis interaktif, dan teknologi Augmented Reality (AR) yang menyenangkan.'), actions: [TextButton(onPressed: () => context.pop(), child: const Text('Tutup'))]));
   }
 
-  void _showInfoDialog(BuildContext context, String title) {
-    showDialog(context: context, builder: (context) => AlertDialog(title: Text(title), content: const Text('Informasi ramah anak dan panduan orang tua.'), actions: [TextButton(onPressed: () => context.pop(), child: const Text('Tutup'))]));
+  void _showTentangLearnify(BuildContext context) {
+    showDialog(context: context, builder: (context) => AlertDialog(title: const Text('Tentang Learnify'), content: const Text('Learnify adalah platform pembelajaran interaktif berbasis AR untuk anak usia dini.\n\nDeskripsi: Menggabungkan elemen visual 3D, konten audio-visual edukatif, dan kuis interaktif.\n\nTarget User: Anak usia dini (TK/PAUD), pendidik.\n\nKelebihan: Pengalaman belajar imersif yang meningkatkan retensi informasi.\n\nSaran Pengembangan: Penambahan modul bahasa asing dan integrasi pelaporan perkembangan belajar anak.'), actions: [TextButton(onPressed: () => context.pop(), child: const Text('Tutup'))]));
   }
 }

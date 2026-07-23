@@ -64,6 +64,6 @@ class LocalStorageService {
 
   /// Retrieves the username from local storage.
   String getUsername() {
-    return _prefs?.getString(_usernameKey) ?? 'Adik';
+    return _prefs?.getString(_usernameKey) ?? 'TK-1';
   }
 }
